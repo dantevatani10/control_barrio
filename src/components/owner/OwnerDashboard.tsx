@@ -1,0 +1,156 @@
+import { useState } from 'react';
+import QuickActions from './QuickActions';
+import WorkerList from './WorkerList';
+import VehicleList from './VehicleList';
+import AddTenantModal from './AddTenantModal';
+import AddFamilyMemberModal from './AddFamilyMemberModal';
+import { ChevronLeft, Download, UserPlus, Trash2, Users } from 'lucide-react';
+import { Role, Profile } from '@/types';
+import { MOCK_PROFILES } from '@/lib/mockData';
+
+export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
+    const [view, setView] = useState('home'); // home, workers, vehicles, tenants, family
+    const [showTenantModal, setShowTenantModal] = useState(false);
+    const [tenants, setTenants] = useState<any[]>([]); // Mock list
+
+    // Family Modal State (Bug Fix 2)
+    const [showFamilyModal, setShowFamilyModal] = useState(false);
+    const [familyMembers, setFamilyMembers] = useState<Profile[]>(
+        role === 'owner' ? [MOCK_PROFILES[0], MOCK_PROFILES[4] ? MOCK_PROFILES[4] : MOCK_PROFILES[0]] : []
+    ); // Mock initial family
+
+    const handleAddTenant = (newTenant: any) => {
+        setTenants([...tenants, newTenant]);
+        setShowTenantModal(false);
+    };
+
+    const handleAddFamilyMember = (newMember: Profile) => {
+        setFamilyMembers([...familyMembers, newMember]);
+        setShowFamilyModal(false);
+        alert(`Familiar agregado: ${newMember.first_name} ${newMember.last_name}`);
+    };
+
+    const currentProfile = role === 'owner'
+        ? MOCK_PROFILES.find(p => p.date_of_birth === '1980-01-01') // Juan
+        : role === 'tenant'
+            ? MOCK_PROFILES.find(p => p.role === 'tenant') // Ana
+            : MOCK_PROFILES[0];
+
+    return (
+        <div className="max-w-md mx-auto min-h-[80vh] flex flex-col">
+            {/* Header */}
+            <div className="mb-6 flex items-center gap-4">
+                {view !== 'home' && (
+                    <button onClick={() => setView('home')} className="bg-white p-2 rounded-full shadow-sm text-slate-600 hover:text-slate-900">
+                        <ChevronLeft size={24} />
+                    </button>
+                )}
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900">
+                        {view === 'home' ? (role === 'tenant' ? 'Hola, Ana 👋' : 'Hola, Juan 👋') :
+                            view === 'workers' ? 'Gestión Trabajadores' :
+                                view === 'tenants' ? 'Inquilinos' :
+                                    view === 'family' ? 'Grupo Familiar' : 'Mis Vehículos'}
+                    </h2>
+                    {view === 'home' && (
+                        <div className="flex items-center gap-2 text-sm">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span className="text-slate-500 font-medium">Lote 101 • {role === 'tenant' ? 'Inquilino' : 'Al Día'}</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 animate-in slide-in-from-right-4 duration-300">
+                {view === 'home' && (
+                    <>
+                        {/* Expenses Card */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-green-50 rounded-bl-full -mr-4 -mt-4" />
+                            <h3 className="text-gray-500 text-sm font-medium mb-1 relative z-10">Estado de Expensas</h3>
+                            <div className="flex items-end justify-between relative z-10">
+                                <div>
+                                    <div className="text-3xl font-bold text-slate-900">$ 150.000</div>
+                                    <div className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-block mt-2">
+                                        ● Al día
+                                    </div>
+                                </div>
+                                <button className="text-blue-600 font-bold text-sm bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors">
+                                    <Download size={20} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <QuickActions onViewChange={setView} role={role} currentProfile={currentProfile} />
+                    </>
+                )}
+                {view === 'workers' && <WorkerList />}
+                {view === 'vehicles' && <VehicleList />}
+
+                {view === 'family' && (
+                    <div className="space-y-4">
+                        {showFamilyModal && (
+                            <AddFamilyMemberModal onClose={() => setShowFamilyModal(false)} onSuccess={handleAddFamilyMember} />
+                        )}
+
+                        {familyMembers.map((member, idx) => (
+                            <div key={idx} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-purple-100 p-2 rounded-full text-purple-600">
+                                        <Users size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-slate-800">{member.first_name} {member.last_name}</div>
+                                        <div className="text-xs text-slate-500">
+                                            {member.can_invite_guests ? 'Habilitado' : 'Sin permisos (Menor)'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button className="text-gray-400 hover:text-red-500"><Trash2 size={20} /></button>
+                            </div>
+                        ))}
+
+                        <button
+                            onClick={() => setShowFamilyModal(true)}
+                            className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg rounded-xl shadow-lg flex items-center justify-center gap-2"
+                        >
+                            <UserPlus size={20} /> Agregar Familiar
+                        </button>
+                    </div>
+                )}
+
+                {view === 'tenants' && (
+                    <div className="space-y-4">
+                        {showTenantModal && (
+                            <AddTenantModal onClose={() => setShowTenantModal(false)} onSuccess={handleAddTenant} />
+                        )}
+
+                        {tenants.map(t => (
+                            <div key={t.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
+                                <div>
+                                    <div className="font-bold text-slate-800">{t.first_name} {t.last_name}</div>
+                                    <div className="text-xs text-slate-500">DNI: {t.dni} • Vence: {t.contract_end}</div>
+                                </div>
+                                <button className="text-gray-400 hover:text-red-500"><Trash2 size={20} /></button>
+                            </div>
+                        ))}
+
+                        {tenants.length === 0 && (
+                            <div className="text-center p-8 text-gray-500">
+                                No hay inquilinos registrados.
+                            </div>
+                        )}
+
+                        <button
+                            onClick={() => setShowTenantModal(true)}
+                            className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-lg rounded-xl shadow-lg flex items-center justify-center gap-2"
+                        >
+                            <UserPlus size={20} /> Nuevo Inquilino
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
