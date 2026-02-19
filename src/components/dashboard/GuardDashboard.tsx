@@ -138,56 +138,10 @@ export default function GuardDashboard() {
 
     // --- RENDER ---
     return (
-        <div className="flex flex-col md:flex-row h-screen bg-gray-50 overflow-hidden font-sans text-slate-900">
+        <div className="font-sans text-slate-900 w-full">
 
-            {/* A. DESKTOP SIDEBAR (Hidden on Mobile) */}
-            <aside className="hidden md:flex flex-col w-64 bg-slate-900 text-white h-full shadow-xl shrink-0 transition-all z-20">
-                <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-                    <Shield className="text-blue-500" size={28} />
-                    <div>
-                        <h1 className="font-bold text-sm tracking-wide">SEGURIDAD</h1>
-                        <p className="text-xs text-slate-400">Santa Clara</p>
-                    </div>
-                </div>
-
-                <nav className="flex-1 p-4 space-y-2">
-                    <button
-                        onClick={() => setActiveTab('dashboard')}
-                        className={clsx("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm",
-                            activeTab === 'dashboard' ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50" : "text-slate-400 hover:bg-slate-800 hover:text-white")}
-                    >
-                        <LayoutDashboard size={20} /> Panel Principal
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('inside')}
-                        className={clsx("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm",
-                            activeTab === 'inside' ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50" : "text-slate-400 hover:bg-slate-800 hover:text-white")}
-                    >
-                        <User size={20} /> En Predio / Salidas
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('directory')}
-                        className={clsx("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm",
-                            activeTab === 'directory' ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50" : "text-slate-400 hover:bg-slate-800 hover:text-white")}
-                    >
-                        <Contact size={20} /> Directorio
-                    </button>
-                </nav>
-
-                <div className="p-4 border-t border-slate-800">
-                    <div className="bg-slate-800 rounded-xl p-4">
-                        <p className="text-xs text-slate-400 mb-1">Estado del Sistema</p>
-                        <div className="flex items-center gap-2 text-green-400 text-xs font-bold">
-                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            ONLINE
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-
-            {/* B. MAIN CONTENT (Responsive Padding) */}
-            <main className="flex-1 overflow-y-auto pb-24 md:pb-0 p-4 md:p-8 relative">
+            {/* MAIN CONTENT */}
+            <main className="w-full">
 
                 {/* --- VISTA A: DASHBOARD --- */}
                 {activeTab === 'dashboard' && (
@@ -206,7 +160,7 @@ export default function GuardDashboard() {
 
                         {/* KPIs Grid */}
                         <div className="grid grid-cols-2 gap-3 md:gap-6 mb-6 md:mb-8">
-                            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-2">
                                 <div>
                                     <p className="text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-wider">Adentro</p>
                                     <p className="text-2xl md:text-4xl font-bold text-slate-900">{stats.people_inside}</p>
@@ -215,7 +169,7 @@ export default function GuardDashboard() {
                                     <User size={20} className="md:w-8 md:h-8" />
                                 </div>
                             </div>
-                            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-2">
                                 <div>
                                     <p className="text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-wider">Visitas Hoy</p>
                                     <p className="text-2xl md:text-4xl font-bold text-slate-900">{stats.visits_today}</p>
@@ -232,13 +186,13 @@ export default function GuardDashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <button
                                     onClick={() => setIsScanning(true)}
-                                    className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 rounded-2xl shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                                    className="bg-blue-600 text-white p-6 rounded-xl shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                                 >
                                     <Scan size={24} />
                                     <span className="text-lg font-bold">ESCANEAR QR</span>
                                 </button>
 
-                                <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col relative">
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col relative">
                                     <div className="flex items-center gap-2 border-b border-slate-100 pb-2 mb-2">
                                         <Search size={18} className="text-slate-400" />
                                         <input
@@ -303,7 +257,7 @@ export default function GuardDashboard() {
                             <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Ingreso Espontáneo</h3>
                             <button
                                 onClick={() => setIsManualModalOpen(true)}
-                                className="w-full bg-white text-slate-700 p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-500 hover:bg-blue-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                                className="w-full bg-white text-blue-600 p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-500 hover:bg-blue-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                             >
                                 <PlusCircle size={24} className="text-blue-600" />
                                 <span className="text-lg font-bold">REGISTRAR VISITANTE MANUAL</span>
@@ -328,7 +282,7 @@ export default function GuardDashboard() {
                                 </div>
                             ) : (
                                 peopleInside.map((person) => (
-                                    <div key={person.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center">
+                                    <div key={person.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                                         <div>
                                             <p className="font-bold text-slate-900">{person.details.guest_name}</p>
                                             <div className="flex items-center gap-2 mt-1">
@@ -369,7 +323,7 @@ export default function GuardDashboard() {
                             {directory.map((item, idx) => {
                                 const cleanPhone = item.phone ? item.phone.replace(/\D/g, '') : '';
                                 return (
-                                    <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center">
+                                    <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                                         <div className="flex items-center gap-3">
                                             <div className="flex flex-col items-center justify-center w-10 h-10 bg-blue-50 rounded-lg text-blue-700 font-bold text-xs">
                                                 <span>{item.unit?.split(' ')[1] || 'S/L'}</span>
@@ -417,34 +371,6 @@ export default function GuardDashboard() {
                     </div>
                 )}
             </main>
-
-
-            {/* C. MOBILE BOTTOM NAVBAR (Hidden on Desktop) */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-900 text-white flex justify-around items-center shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-40 pb-safe">
-                <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className={clsx("flex flex-col items-center gap-1 w-16 transition-colors", activeTab === 'dashboard' ? "text-blue-400" : "text-slate-400")}
-                >
-                    <LayoutDashboard size={24} />
-                    <span className="text-[9px] font-bold">Panel</span>
-                </button>
-                <div className="w-px h-8 bg-slate-800"></div>
-                <button
-                    onClick={() => setActiveTab('inside')}
-                    className={clsx("flex flex-col items-center gap-1 w-16 transition-colors", activeTab === 'inside' ? "text-blue-400" : "text-slate-400")}
-                >
-                    <User size={24} />
-                    <span className="text-[9px] font-bold">Adentro</span>
-                </button>
-                <div className="w-px h-8 bg-slate-800"></div>
-                <button
-                    onClick={() => setActiveTab('directory')}
-                    className={clsx("flex flex-col items-center gap-1 w-16 transition-colors", activeTab === 'directory' ? "text-blue-400" : "text-slate-400")}
-                >
-                    <Contact size={24} />
-                    <span className="text-[9px] font-bold">Dir</span>
-                </button>
-            </nav>
 
 
             {/* --- MODALS --- */}
@@ -636,7 +562,6 @@ export default function GuardDashboard() {
                 )
             }
 
-
-        </div >
+        </div>
     );
 }

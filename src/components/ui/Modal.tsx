@@ -40,16 +40,16 @@ export function Modal({
     }[maxWidth];
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] flex flex-col justify-end md:justify-center md:items-center p-0 md:p-4">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
 
             {/* Modal Dialog */}
             <div
-                className={`relative bg-white w-full ${maxWidthClass} rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 slide-in-from-bottom-5 duration-200`}
+                className={`relative bg-white w-full ${maxWidthClass} rounded-t-[2rem] md:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] md:max-h-[85vh] animate-in slide-in-from-bottom-full md:zoom-in-95 duration-300 mt-12 md:mt-0`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
