@@ -4,17 +4,29 @@ import React from 'react';
 import { clsx } from 'clsx';
 import { Shield, User, Lock } from 'lucide-react';
 import { Role } from '@/types';
+import { usePathname, useRouter } from 'next/navigation';
 
-interface RoleSwitcherProps {
-    currentRole: Role;
-    onRoleChange: (role: Role) => void;
-}
+export default function RoleSwitcher() {
+    const router = useRouter();
+    const pathname = usePathname();
 
-export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcherProps) {
+    const getRoleFromPath = (): Role => {
+        if (pathname?.includes('/admin')) return 'admin';
+        if (pathname?.includes('/guard')) return 'guard';
+        if (pathname?.includes('/owner')) return 'owner';
+        if (pathname?.includes('/tenant')) return 'tenant';
+        return 'admin';
+    };
+
+    const currentRole = getRoleFromPath();
+
+    const handleRoleChange = (role: Role) => {
+        router.push(`/dashboard/${role}`);
+    };
     return (
         <div className="fixed bottom-6 right-6 bg-white shadow-2xl rounded-full p-2 flex gap-2 border border-gray-200 z-50 animate-fade-in-up">
             <button
-                onClick={() => onRoleChange('guard')}
+                onClick={() => handleRoleChange('guard')}
                 className={clsx(
                     "p-3 rounded-full transition-all duration-300 flex items-center gap-2",
                     currentRole === 'guard' ? "bg-blue-600 text-white shadow-lg scale-105" : "text-gray-500 hover:bg-gray-100"
@@ -26,7 +38,7 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
             </button>
 
             <button
-                onClick={() => onRoleChange('owner')}
+                onClick={() => handleRoleChange('owner')}
                 className={clsx(
                     "p-3 rounded-full transition-all duration-300 flex items-center gap-2",
                     currentRole === 'owner' ? "bg-green-600 text-white shadow-lg scale-105" : "text-gray-500 hover:bg-gray-100"
@@ -38,7 +50,7 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
             </button>
 
             <button
-                onClick={() => onRoleChange('tenant')}
+                onClick={() => handleRoleChange('tenant')}
                 className={clsx(
                     "p-3 rounded-full transition-all duration-300 flex items-center gap-2",
                     currentRole === 'tenant' ? "bg-teal-600 text-white shadow-lg scale-105" : "text-gray-500 hover:bg-gray-100"
@@ -50,7 +62,7 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
             </button>
 
             <button
-                onClick={() => onRoleChange('admin')}
+                onClick={() => handleRoleChange('admin')}
                 className={clsx(
                     "p-3 rounded-full transition-all duration-300 flex items-center gap-2",
                     currentRole === 'admin' ? "bg-purple-600 text-white shadow-lg scale-105" : "text-gray-500 hover:bg-gray-100"

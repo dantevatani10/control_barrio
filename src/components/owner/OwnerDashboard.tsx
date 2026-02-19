@@ -4,7 +4,7 @@ import WorkerList from './WorkerList';
 import VehicleList from './VehicleList';
 import AddTenantModal from './AddTenantModal';
 import AddFamilyMemberModal from './AddFamilyMemberModal';
-import { ChevronLeft, Download, UserPlus, Trash2, Users } from 'lucide-react';
+import { ChevronLeft, Download, UserPlus, Trash2, Users, AlertTriangle, ShieldAlert, Ambulance } from 'lucide-react';
 import { Role, Profile } from '@/types';
 import { mockService } from '@/lib/mock-service';
 import { Badge } from '@/components/ui/Badge';
@@ -20,6 +20,9 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
     // Family Modal State
     const [showFamilyModal, setShowFamilyModal] = useState(false);
     const [familyMembers, setFamilyMembers] = useState<Profile[]>([]);
+
+    // Emergency S.O.S State
+    const [showSOSModal, setShowSOSModal] = useState(false);
 
     useEffect(() => {
         // Load Profile from Service based on Role for Demo
@@ -52,10 +55,19 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
         alert(`Familiar agregado a memoria: ${newMember.first_name}`);
     };
 
+    const handleTriggerSOS = async (type: 'MEDICAL' | 'SECURITY') => {
+        const residentName = currentProfile ? `${currentProfile.first_name} ${currentProfile.last_name}` : 'Residente';
+        const unitId = currentProfile?.unit_id || 'Lote 101'; // Fallback for DEMO
+
+        await mockService.triggerEmergency(unitId, residentName, type);
+        setShowSOSModal(false);
+        alert('🚨 ALERTA S.O.S ENVIADA A LA GUARDIA INMEDIATAMENTE');
+    };
+
     if (!currentProfile) return <div className="p-10 text-center">Cargando perfil...</div>;
 
     return (
-        <div className="max-w-md mx-auto min-h-[80vh] flex flex-col">
+        <div className="max-w-md mx-auto min-h-[80vh] flex flex-col relative pb-32">
             {/* Header */}
             <div className="mb-6 flex items-center gap-4">
                 {view !== 'home' && (
@@ -171,6 +183,58 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
                     </div>
                 )}
             </div>
+
+            {/* FLOATING ACTION BUTTON (S.O.S) */}
+            <button
+                onClick={() => setShowSOSModal(true)}
+                className="fixed bottom-24 right-6 md:right-10 z-40 bg-rose-600 text-white p-4 rounded-full shadow-[0_0_30px_rgba(225,29,72,0.6)] hover:bg-rose-700 transition-all hover:scale-110 active:scale-95 flex items-center justify-center animate-bounce border-4 border-rose-300"
+                title="Botón de S.O.S."
+            >
+                <AlertTriangle size={36} />
+            </button>
+
+            {/* S.O.S MODAL CONFIRMATION */}
+            {showSOSModal && (
+                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl overflow-hidden w-full max-w-sm shadow-2xl flex flex-col items-center p-8 text-center border-4 border-rose-500 animate-in zoom-in-90">
+                        <div className="bg-rose-100 text-rose-600 p-4 rounded-full mb-4">
+                            <AlertTriangle size={48} />
+                        </div>
+
+                        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">
+                            ¿NECESITAS AYUDA?
+                        </h2>
+                        <p className="text-sm text-slate-500 font-medium mb-8">
+                            Dispara una alerta inmediata a la guardia.
+                        </p>
+
+                        <div className="w-full space-y-4">
+                            <button
+                                onClick={() => handleTriggerSOS('MEDICAL')}
+                                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 border-2 border-blue-200 p-4 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition-all group"
+                            >
+                                <Ambulance size={32} className="group-hover:scale-110 transition-transform" />
+                                <span className="text-lg font-black tracking-wide">MÉDICA</span>
+                            </button>
+
+                            <button
+                                onClick={() => handleTriggerSOS('SECURITY')}
+                                className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border-2 border-rose-200 p-4 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition-all group"
+                            >
+                                <ShieldAlert size={32} className="group-hover:scale-110 transition-transform" />
+                                <span className="text-lg font-black tracking-wide">SEGURIDAD</span>
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => setShowSOSModal(false)}
+                            className="mt-8 text-slate-400 font-bold hover:text-slate-600 uppercase text-sm px-6 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+                        >
+                            Cancelar / Error
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

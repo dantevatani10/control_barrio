@@ -14,12 +14,16 @@ import { Unit, AccessLog, Invitation, Profile } from '@/types';
 import { DemoWorker } from '@/lib/mock-service';
 import { Modal } from '@/components/ui/Modal';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Emergency = any;
+
 export default function GuardDashboard() {
     // State for Tabs
     const [activeTab, setActiveTab] = useState<'dashboard' | 'inside' | 'directory'>('dashboard');
 
     // Global Stats
     const [stats, setStats] = useState({ people_inside: 0, visits_today: 0 });
+    const [activeEmergencies, setActiveEmergencies] = useState<Emergency[]>([]);
 
     // Dashboard State
     const [isScanning, setIsScanning] = useState(false);
@@ -66,6 +70,19 @@ export default function GuardDashboard() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
     }, [activeTab]);
+
+    // Polling for Active Emergencies
+    useEffect(() => {
+        const checkEmergencies = async () => {
+            const emergencies = await mockService.getActiveEmergencies();
+            setActiveEmergencies(emergencies);
+        };
+
+        checkEmergencies(); // Initial check
+        const interval = setInterval(checkEmergencies, 2000);
+
+        return () => clearInterval(interval);
+    }, []);
 
 
 
@@ -142,6 +159,41 @@ export default function GuardDashboard() {
 
             {/* MAIN CONTENT */}
             <main className="w-full">
+                {/* --- S.O.S EMERGENCY BANNER --- */}
+                {activeEmergencies.length > 0 && (
+                    <div className="max-w-5xl mx-auto mb-6">
+                        {activeEmergencies.map(em => (
+                            <div key={em.id} className="bg-rose-600 text-white p-6 rounded-2xl animate-pulse shadow-2xl mb-4 flex flex-col md:flex-row items-center justify-between border-4 border-rose-400 z-50">
+                                <div className="flex items-center gap-4 mb-4 md:mb-0">
+                                    <div className="bg-white text-rose-600 p-3 rounded-full">
+                                        <Scan size={32} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl md:text-2xl font-black uppercase tracking-wider">
+                                            🚨 ¡ALERTA {em.type === 'MEDICAL' ? 'MÉDICA' : 'DE SEGURIDAD'}!
+                                        </h3>
+                                        <p className="font-bold md:text-lg">
+                                            LOTE {em.unitId} - {em.residentName}
+                                        </p>
+                                        <p className="text-xs text-rose-200 mt-1">
+                                            Generada el {new Date(em.timestamp).toLocaleTimeString()}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        await mockService.resolveEmergency(em.id);
+                                        const remaining = await mockService.getActiveEmergencies();
+                                        setActiveEmergencies(remaining);
+                                    }}
+                                    className="bg-white text-rose-600 font-bold px-6 py-3 rounded-xl shadow-lg border-2 border-transparent hover:bg-rose-50 hover:border-white transition-all w-full md:w-auto text-center"
+                                >
+                                    MARCAR COMO RESUELTA
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* --- VISTA A: DASHBOARD --- */}
                 {activeTab === 'dashboard' && (

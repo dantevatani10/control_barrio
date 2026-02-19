@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Role } from '@/types';
+import RoleSwitcher from '@/components/RoleSwitcher';
 
 // Role-based navigation configuration
 const NAV_LINKS = {
@@ -223,6 +224,8 @@ export default function DashboardLayout({
                 </ul>
             </nav>
 
+            {/* GLOBAL ROLE SWITCHER (For Demo/Dev Purposes) */}
+            <RoleSwitcher />
         </div>
     );
 }

@@ -20,6 +20,8 @@ class MockService {
     private invitations: Invitation[] = [];
     private logs: AccessLog[] = [];
     private vehicles: Vehicle[] = []; // Add vehicles property
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private emergencies: any[] = [];
 
     private constructor() {
         this.initialize();
@@ -424,6 +426,34 @@ class MockService {
 
     // --- GUARD MANAGEMENT ---
     getGuards() { return this.users.filter(u => u.role === 'guard'); }
+
+    // --- EMERGENCIES (S.O.S) ---
+    async triggerEmergency(unitId: string, residentName: string, type: 'MEDICAL' | 'SECURITY') {
+        const newEmergency = {
+            id: Date.now().toString(),
+            unitId,
+            residentName,
+            type,
+            status: 'ACTIVE',
+            timestamp: new Date().toISOString()
+        };
+        this.emergencies.push(newEmergency);
+        return newEmergency;
+    }
+
+    async getActiveEmergencies() {
+        return this.emergencies.filter(e => e.status === 'ACTIVE');
+    }
+
+    async resolveEmergency(id: string) {
+        const emergency = this.emergencies.find(e => e.id === id);
+        if (emergency) {
+            emergency.status = 'RESOLVED';
+            emergency.resolvedAt = new Date().toISOString();
+            return true;
+        }
+        return false;
+    }
 
     createGuard(data: { first_name: string; last_name: string; email: string; shift?: 'Mañana' | 'Tarde' | 'Noche' }) {
         const newGuard: Profile = {
