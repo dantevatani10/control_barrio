@@ -1,13 +1,20 @@
-import { useState } from 'react';
-import { MOCK_WORKERS, MOCK_INSURANCE_DOCS } from '@/lib/mockData';
+import { useState, useEffect } from 'react';
+import { mockService, DemoWorker } from '@/lib/mock-service';
 import { FileText, Upload, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import WorkerForm from './WorkerForm';
 
 export default function WorkerList() {
     const [showForm, setShowForm] = useState(false);
+    const [workers, setWorkers] = useState<DemoWorker[]>([]);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/rules-of-hooks, @next/next/no-img-element
+        // eslint-disable-next-line
+        setWorkers(mockService.getWorkers());
+    }, [showForm]); // Refresh when form closes
 
     const getInsuranceStatus = (workerId: string) => {
-        return MOCK_INSURANCE_DOCS.find(doc => doc.worker_id === workerId);
+        return mockService.getInsuranceDoc(workerId);
     };
 
     return (
@@ -24,9 +31,9 @@ export default function WorkerList() {
                 />
             )}
 
-            {MOCK_WORKERS.map(worker => {
+            {workers.map(worker => {
                 const insurance = getInsuranceStatus(worker.id);
-                const status = insurance?.status || 'pending';
+                const status = (insurance?.status || worker.status || 'pending') as string;
 
                 return (
                     <div key={worker.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">

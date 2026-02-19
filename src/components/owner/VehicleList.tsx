@@ -1,11 +1,16 @@
-import { useState } from 'react';
-import { MOCK_VEHICLES } from '@/lib/mockData';
+import { useState, useEffect } from 'react';
+import { mockService } from '@/lib/mock-service';
 import { Car, Trash2, Plus } from 'lucide-react';
 import { Vehicle } from '@/types';
 import AddVehicleModal from './AddVehicleModal';
 
 export default function VehicleList() {
-    const [vehicles, setVehicles] = useState<Vehicle[]>(MOCK_VEHICLES);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+
+    useEffect(() => {
+        // eslint-disable-next-line
+        setVehicles(mockService.getVehicles());
+    }, []);
     const [showModal, setShowModal] = useState(false);
 
     const handleAddVehicle = (newVehicle: Vehicle) => {

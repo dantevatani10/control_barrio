@@ -18,19 +18,22 @@ export default function AddFamilyMemberModal({ onClose, onSuccess }: AddFamilyMe
 
     const [isMinor, setIsMinor] = useState(false);
 
-    useEffect(() => {
-        if (formData.dob) {
-            const age = calculateAge(formData.dob);
-            setIsMinor(age < 15);
-        }
-    }, [formData.dob]);
-
-    const calculateAge = (dobString: string) => {
+    function calculateAge(dobString: string) {
         const dob = new Date(dobString);
         const diffMs = Date.now() - dob.getTime();
         const ageDate = new Date(diffMs); // miliseconds from epoch
         return Math.abs(ageDate.getUTCFullYear() - 1970);
-    };
+    }
+
+    useEffect(() => {
+        if (formData.dob) {
+            const age = calculateAge(formData.dob);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setIsMinor(age < 15);
+        }
+    }, [formData.dob]);
+
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

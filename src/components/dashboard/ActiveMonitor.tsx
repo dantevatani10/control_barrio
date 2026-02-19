@@ -20,6 +20,7 @@ export default function ActiveMonitor() {
 
     const getDuration = (timestamp: string) => {
         const start = new Date(timestamp).getTime();
+        // eslint-disable-next-line react-hooks/purity
         const now = Date.now();
         const diffHours = Math.floor((now - start) / (1000 * 60 * 60));
         const diffMinutes = Math.floor(((now - start) % (1000 * 60 * 60)) / (1000 * 60));

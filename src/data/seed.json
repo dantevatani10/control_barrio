@@ -1,0 +1,137 @@
+{
+    "community": {
+        "name": "Barrio Santa Clara",
+        "address": "Av. Libertador 1234",
+        "stats": {
+            "people_inside": 14,
+            "pending_docs": 2,
+            "visits_today": 25
+        }
+    },
+    "users": [
+        {
+            "id": "u1",
+            "name": "Admin General",
+            "role": "admin",
+            "email": "admin@demo.com"
+        },
+        {
+            "id": "u2",
+            "name": "Carlos Ruiz",
+            "role": "owner",
+            "email": "propietario@demo.com",
+            "unit_id": "Lote 101",
+            "phone": "+54 9 11 5555-1234",
+            "vehicles": [
+                {
+                    "brand": "Toyota",
+                    "plate": "AA123BB"
+                }
+            ],
+            "photo_url": "https://i.pravatar.cc/150?u=carlos",
+            "date_of_birth": "1980-05-15",
+            "can_invite_guests": true
+        },
+        {
+            "id": "u3",
+            "name": "Laura Gómez",
+            "role": "tenant",
+            "email": "inquilino@demo.com",
+            "unit_id": "Lote 101",
+            "phone": "+54 9 11 5555-9876",
+            "contract_end": "2026-12-31",
+            "photo_url": "https://i.pravatar.cc/150?u=laura",
+            "date_of_birth": "1990-05-15",
+            "can_invite_guests": true
+        },
+        {
+            "id": "u4",
+            "name": "Guardia Pedro",
+            "role": "guard",
+            "email": "guardia@demo.com",
+            "photo_url": "https://i.pravatar.cc/150?u=guard"
+        },
+        {
+            "id": "u5",
+            "name": "Ana Perez",
+            "role": "owner",
+            "email": "ana@demo.com",
+            "unit_id": "Lote 102",
+            "phone": "+54 9 11 4444-5555",
+            "photo_url": "https://i.pravatar.cc/150?u=ana"
+        },
+        {
+            "id": "kid1",
+            "name": "Julián Ruiz",
+            "role": "resident",
+            "email": "hijo@demo.com",
+            "unit_id": "Lote 101",
+            "photo_url": "https://i.pravatar.cc/150?u=kid",
+            "date_of_birth": "2015-01-01",
+            "can_invite_guests": false
+        }
+    ],
+    "units": [
+        {
+            "id": "u101",
+            "name": "Lote 101",
+            "balance": -50000,
+            "status": "debt",
+            "community_id": "c1"
+        }
+    ],
+    "invitations": [
+        {
+            "id": "v1",
+            "guest_name": "Juan Delivery",
+            "guest_dni": "33444555",
+            "type": "single",
+            "status": "active",
+            "unit_id": "u101",
+            "valid_from": "2024-02-17T08:00:00",
+            "valid_to": "2024-02-17T20:00:00",
+            "created_by": "owner1"
+        },
+        {
+            "id": "v2",
+            "guest_name": "Maria Tía",
+            "guest_dni": "11222333",
+            "type": "social",
+            "status": "pending",
+            "unit_id": "u101",
+            "valid_from": "2024-02-17T08:00:00",
+            "valid_to": "2024-02-17T23:59:00",
+            "created_by": "owner1"
+        }
+    ],
+    "workers": [
+        {
+            "id": "w1",
+            "first_name": "Pintores",
+            "last_name": "SRL",
+            "dni": "20-12345678-9",
+            "role": "painter",
+            "status": "approved",
+            "days": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "access_start": "08:00",
+            "access_end": "17:00",
+            "insurance_expiry": "2025-01-01"
+        }
+    ],
+    "logs": [
+        {
+            "id": "l1",
+            "visitor_name": "Juan Delivery",
+            "visitor_dni": "33444555",
+            "action": "entry",
+            "timestamp": "2024-02-17T10:00:00",
+            "unit_id": "u101"
+        }
+    ]
+}

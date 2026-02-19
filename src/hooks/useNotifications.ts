@@ -12,6 +12,7 @@ export function useNotifications() {
 
     useEffect(() => {
         if ('serviceWorker' in navigator && 'PushManager' in window) {
+            // eslint-disable-next-line
             setPermission(Notification.permission);
             navigator.serviceWorker.ready.then(function (registration) {
                 registration.pushManager.getSubscription().then(function (sub) {

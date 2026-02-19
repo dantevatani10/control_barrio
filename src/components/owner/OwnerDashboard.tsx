@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import QuickActions from './QuickActions';
 import WorkerList from './WorkerList';
 import VehicleList from './VehicleList';
@@ -6,20 +6,42 @@ import AddTenantModal from './AddTenantModal';
 import AddFamilyMemberModal from './AddFamilyMemberModal';
 import { ChevronLeft, Download, UserPlus, Trash2, Users } from 'lucide-react';
 import { Role, Profile } from '@/types';
-import { MOCK_PROFILES } from '@/lib/mockData';
+import { mockService } from '@/lib/mock-service';
+import { Badge } from '@/components/ui/Badge';
 
 export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
     const [view, setView] = useState('home'); // home, workers, vehicles, tenants, family
     const [showTenantModal, setShowTenantModal] = useState(false);
-    const [tenants, setTenants] = useState<any[]>([]); // Mock list
+    const [tenants, setTenants] = useState<(Profile & { dni?: string; contract_end?: string })[]>([]);
 
-    // Family Modal State (Bug Fix 2)
+    // Core Data State
+    const [currentProfile, setCurrentProfile] = useState<Profile | undefined>(undefined);
+
+    // Family Modal State
     const [showFamilyModal, setShowFamilyModal] = useState(false);
-    const [familyMembers, setFamilyMembers] = useState<Profile[]>(
-        role === 'owner' ? [MOCK_PROFILES[0], MOCK_PROFILES[4] ? MOCK_PROFILES[4] : MOCK_PROFILES[0]] : []
-    ); // Mock initial family
+    const [familyMembers, setFamilyMembers] = useState<Profile[]>([]);
 
-    const handleAddTenant = (newTenant: any) => {
+    useEffect(() => {
+        // Load Profile from Service based on Role for Demo
+        const profile = mockService.login(role);
+        // eslint-disable-next-line
+        setCurrentProfile(profile);
+
+        // Load initial family (Mock: just filtering other users for now or empty)
+        // In a real demo we might want to see 'kid1' if logged in as 'owner1'
+        const users = mockService.getUsers();
+        if (role === 'owner') {
+            // Find kids/others in same unit?
+            // seed "kid1" has unit_id "u101", owner1 has "u101"
+            const myUnitId = profile?.unit_id;
+            if (myUnitId) {
+                const family = users.filter(u => u.unit_id === myUnitId && u.id !== profile?.id && u.role === 'resident');
+                setFamilyMembers(family);
+            }
+        }
+    }, [role]);
+
+    const handleAddTenant = (newTenant: Profile & { dni?: string; contract_end?: string }) => {
         setTenants([...tenants, newTenant]);
         setShowTenantModal(false);
     };
@@ -27,14 +49,10 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
     const handleAddFamilyMember = (newMember: Profile) => {
         setFamilyMembers([...familyMembers, newMember]);
         setShowFamilyModal(false);
-        alert(`Familiar agregado: ${newMember.first_name} ${newMember.last_name}`);
+        alert(`Familiar agregado a memoria: ${newMember.first_name}`);
     };
 
-    const currentProfile = role === 'owner'
-        ? MOCK_PROFILES.find(p => p.date_of_birth === '1980-01-01') // Juan
-        : role === 'tenant'
-            ? MOCK_PROFILES.find(p => p.role === 'tenant') // Ana
-            : MOCK_PROFILES[0];
+    if (!currentProfile) return <div className="p-10 text-center">Cargando perfil...</div>;
 
     return (
         <div className="max-w-md mx-auto min-h-[80vh] flex flex-col">
@@ -47,7 +65,7 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
                 )}
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900">
-                        {view === 'home' ? (role === 'tenant' ? 'Hola, Ana 👋' : 'Hola, Juan 👋') :
+                        {view === 'home' ? `Hola, ${currentProfile.first_name} 👋` :
                             view === 'workers' ? 'Gestión Trabajadores' :
                                 view === 'tenants' ? 'Inquilinos' :
                                     view === 'family' ? 'Grupo Familiar' : 'Mis Vehículos'}
@@ -71,10 +89,12 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
                             <h3 className="text-gray-500 text-sm font-medium mb-1 relative z-10">Estado de Expensas</h3>
                             <div className="flex items-end justify-between relative z-10">
                                 <div>
-                                    <div className="text-3xl font-bold text-slate-900">$ 150.000</div>
-                                    <div className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-block mt-2">
-                                        ● Al día
+                                    <div className={`text-3xl font-bold ${role === 'owner' ? 'text-slate-900' : 'text-slate-700'}`}>
+                                        $ 50.000
                                     </div>
+                                    <Badge variant="danger" className="mt-2 inline-block">
+                                        ● Con Deuda (No Bloqueante)
+                                    </Badge>
                                 </div>
                                 <button className="text-blue-600 font-bold text-sm bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors">
                                     <Download size={20} />

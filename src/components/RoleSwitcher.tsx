@@ -3,12 +3,11 @@
 import React from 'react';
 import { clsx } from 'clsx';
 import { Shield, User, Lock } from 'lucide-react';
-
-export type DemoRole = 'guard' | 'owner' | 'admin' | 'tenant';
+import { Role } from '@/types';
 
 interface RoleSwitcherProps {
-    currentRole: DemoRole;
-    onRoleChange: (role: DemoRole) => void;
+    currentRole: Role;
+    onRoleChange: (role: Role) => void;
 }
 
 export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcherProps) {

@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'guard' | 'owner' | 'tenant';
+export type Role = 'admin' | 'guard' | 'owner' | 'tenant' | 'resident';
 
 export interface Profile {
   id: string;
@@ -12,6 +12,9 @@ export interface Profile {
   photo_url?: string; // Added for UI
   date_of_birth?: string; // Phase 10: Parent Control
   can_invite_guests?: boolean; // Phase 10: Computed from age
+  unit_id?: string; // Added to link to unit
+  check_in?: string; // For Guard: shift start
+  shift?: 'Mañana' | 'Tarde' | 'Noche'; // For Guard
   created_at: string;
 }
 
@@ -24,14 +27,26 @@ export interface Unit {
   status: UnitStatus;
   owner_id?: string;
   tenant_id?: string;
+  contacts?: {
+    name: string;
+    phone: string;
+    priority: 'primary' | 'secondary' | 'emergency';
+  }[];
+  residents?: {
+    name: string;
+    role: Role;
+    id?: string;
+  }[];
 }
 
 export interface Vehicle {
   id: string;
   profile_id: string;
+  unit_id?: string; // Easy lookup for admin
   community_id: string;
   brand: string;
   model: string;
+  year?: string;
   color: string;
   license_plate: string;
   type?: 'car' | 'motorcycle' | 'truck';
@@ -86,11 +101,11 @@ export interface Invitation {
   guest_name: string;
   guest_dni?: string;
   type: InvitationType;
+  plate?: string;
   valid_from: string;
   valid_to: string;
   status: InvitationStatus;
   qr_token?: string; // Made optional for manual invites
-  plate?: string; // Added
   created_by_profile_id?: string; // Phase 9: For targeted notifications
 }
 

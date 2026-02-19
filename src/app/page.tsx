@@ -1,5 +1,7 @@
+'use client';
+
 import Link from "next/link";
-import { Shield, ArrowRight, CheckCircle2, Building2, Users, Lock, Smartphone } from "lucide-react";
+import { Shield, ArrowRight, CheckCircle2, Building2, Users, Lock, Smartphone, Share2, CheckCircle, BarChart } from "lucide-react";
 
 export default function Home() {
   return (
@@ -53,6 +55,39 @@ export default function Home() {
                 <button className="inline-flex items-center justify-center gap-2 bg-white text-slate-700 border border-gray-200 px-8 py-4 rounded-xl font-bold text-lg hover:border-blue-600 hover:text-blue-600 transition-all">
                   Agendar Reunión
                 </button>
+              </div>
+
+              <div className="flex flex-col gap-4 w-full max-w-sm">
+                <button
+                  onClick={() => window.location.href = '/dashboard/demo?role=admin'}
+                  className="bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                >
+                  Login como Admin
+                </button>
+                <button
+                  onClick={() => window.location.href = '/dashboard/demo?role=guard'}
+                  className="bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                >
+                  Login como Guardia (Mobile)
+                </button>
+                <button
+                  onClick={() => window.location.href = '/dashboard/demo?role=owner'}
+                  className="bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
+                >
+                  Login como Propietario
+                </button>
+                <button
+                  onClick={() => window.location.href = '/dashboard/demo?role=tenant'}
+                  className="bg-orange-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-orange-600 transition-all flex items-center justify-center gap-2"
+                >
+                  Login como Inquilino
+                </button>
+              </div>
+
+              <div className="mt-8 p-4 bg-yellow-50 rounded-lg text-yellow-800 text-sm max-w-sm text-center border border-yellow-100">
+                <strong>Modo Demo Standalone:</strong>
+                <br />
+                Datos simulados en memoria. No requiere base de datos real.
               </div>
 
               <div className="flex items-center gap-8 text-sm font-medium text-slate-500">

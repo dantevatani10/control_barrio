@@ -1,20 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Scanner } from '@yudiel/react-qr-scanner';
-import { ShieldCheck, ShieldAlert, AlertTriangle, XCircle, CheckCircle, Search, ScanLine } from 'lucide-react';
-import { clsx } from 'clsx';
+import { Scan, AlertTriangle, CheckCircle, XCircle, Search, LogOut } from 'lucide-react';
+import { mockService } from '@/lib/mock-service';
+import { clsx } from 'clsx'; // Ensure clsx is installed or remove usage if not. Wait, assuming it is or I should use template literal.
 
 interface ScanResult {
     valid: boolean;
     message: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data?: any;
 }
 
 
 import ManualEntryForm from './ManualEntryForm';
 import { MOCK_INVITATIONS, MOCK_UNITS, MOCK_WORKERS, MOCK_WORK_AUTHORIZATIONS, MOCK_PROFILES } from '@/lib/mockData';
-import { Invitation } from '@/types';
+import { Invitation, AccessLog } from '@/types';
 
 // ... (existing imports)
 
@@ -203,7 +205,7 @@ export default function GuardScanner() {
         return (
             <div className="absolute inset-0 z-50 bg-white p-6 flex flex-col items-center justify-center animate-in zoom-in-95">
                 <div className="bg-red-50 p-4 rounded-full mb-4">
-                    <ShieldAlert size={48} className="text-red-600" />
+                    <AlertTriangle size={48} className="text-red-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-red-600 mb-2">FORZAR INGRESO</h2>
                 <p className="text-center text-gray-500 mb-6">Esta acción quedará registrada en la auditoría.</p>
@@ -289,8 +291,7 @@ export default function GuardScanner() {
         );
     }
 
-    // HANDLE MANUAL SUCCESS
-    const handleManualSuccess = (log: any) => {
+    const handleManualSuccess = (log: AccessLog) => {
         setShowManualEntry(false);
         setResult({
             valid: true,
@@ -345,7 +346,7 @@ export default function GuardScanner() {
                         className="w-full group relative bg-blue-600 hover:bg-blue-500 text-white p-8 rounded-2xl shadow-2xl transition-all hover:scale-[1.02] flex flex-col items-center gap-3 overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-700 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <ScanLine size={48} className="relative z-10" />
+                        <Scan size={48} className="relative z-10" />
                         <span className="relative z-10 text-xl font-bold tracking-wide">ESCANEAR QR</span>
                     </button>
 

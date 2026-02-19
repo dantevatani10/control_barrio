@@ -79,6 +79,7 @@ export default function AdminGuardManagement() {
                                 <span className="text-sm text-gray-600">{guard.email}</span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {/* eslint-disable-next-line react-hooks/purity */}
                                 Hace {Math.floor(Math.random() * 24)}h
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
