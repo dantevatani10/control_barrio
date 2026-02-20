@@ -570,44 +570,60 @@ export default function GuardDashboard() {
                 )
             }
 
-            {/* SCAN RESULT RESULT */}
+            {/* SCAN RESULT — TRAFFIC LIGHT UI */}
             {
                 scanResult && (
-                    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
-                        <div className={`bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden text-center`}>
-                            <div className={`p-8 ${scanResult.valid ? 'bg-green-600' : 'bg-red-600'} text-white`}>
-                                <div className="mb-4 flex justify-center">
-                                    {scanResult.valid ? <CheckCircle size={80} /> : <XCircle size={80} />}
-                                </div>
-                                <h2 className="text-3xl font-bold">{scanResult.valid ? 'ACCESO PERMITIDO' : 'DENEGADO'}</h2>
-                                <p className="opacity-90 mt-2 font-medium">{scanResult.reason || 'Documentación Validada'}</p>
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
+                        {/* Full-screen color background */}
+                        <div className={`absolute inset-0 ${scanResult.valid ? 'bg-emerald-500' : 'bg-rose-600'}`} />
+
+                        <div className="relative z-10 w-full max-w-sm flex flex-col items-center text-center text-white">
+                            {/* Giant Icon */}
+                            <div className="mb-6 animate-in zoom-in duration-500">
+                                {scanResult.valid
+                                    ? <CheckCircle size={120} strokeWidth={1.5} />
+                                    : <XCircle size={120} strokeWidth={1.5} />
+                                }
                             </div>
 
-                            <div className="p-8">
-                                {scanResult.entity && (
-                                    <div className="text-left mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Visitante</p>
-                                        <p className="text-xl font-bold text-slate-900">{scanResult.entity.guest_name || scanResult.entity.first_name + ' ' + scanResult.entity.last_name}</p>
-                                        <p className="text-sm text-slate-500 mt-1">{scanResult.entity.unit_id || 'Personal Autorizado'}</p>
-                                    </div>
-                                )}
+                            {/* Main Status */}
+                            <h2 className="text-4xl sm:text-5xl font-black tracking-tight uppercase mb-2">
+                                {scanResult.valid ? 'ACCESO AUTORIZADO' : 'ACCESO DENEGADO'}
+                            </h2>
 
-                                <div className="space-y-3">
-                                    {scanResult.valid && (
-                                        <button
-                                            onClick={confirmScanEntry}
-                                            className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 shadow-lg transform transition active:scale-[0.98]"
-                                        >
-                                            Registrar Ingreso
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={() => setScanResult(null)}
-                                        className="w-full py-4 bg-white text-slate-500 border border-slate-200 rounded-xl font-bold hover:bg-slate-50"
-                                    >
-                                        Cerrar
-                                    </button>
+                            {/* Minimal reason */}
+                            {scanResult.reason && (
+                                <p className="text-white/80 font-medium text-lg mb-6">{scanResult.reason}</p>
+                            )}
+
+                            {/* Entity details — compact */}
+                            {scanResult.entity && (
+                                <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-6 py-4 mb-8 w-full">
+                                    <p className="text-2xl font-bold">
+                                        {scanResult.entity.guest_name || scanResult.entity.first_name + ' ' + scanResult.entity.last_name}
+                                    </p>
+                                    <p className="text-white/70 text-sm font-medium mt-1">
+                                        {scanResult.entity.unit_id || 'Personal Autorizado'}
+                                    </p>
                                 </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="space-y-3 w-full">
+                                {scanResult.valid && (
+                                    <button
+                                        onClick={confirmScanEntry}
+                                        className="w-full py-4 bg-white text-emerald-700 rounded-2xl font-black text-lg shadow-xl transform transition active:scale-[0.97] hover:bg-emerald-50"
+                                    >
+                                        ✅ REGISTRAR INGRESO
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setScanResult(null)}
+                                    className="w-full py-3 bg-white/20 backdrop-blur-sm text-white border-2 border-white/30 rounded-2xl font-bold hover:bg-white/30 transition-all"
+                                >
+                                    Cerrar
+                                </button>
                             </div>
                         </div>
                     </div>

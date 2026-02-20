@@ -4,7 +4,7 @@ import WorkerList from './WorkerList';
 import VehicleList from './VehicleList';
 import AddTenantModal from './AddTenantModal';
 import AddFamilyMemberModal from './AddFamilyMemberModal';
-import { ChevronLeft, Download, UserPlus, Trash2, Users, AlertTriangle, ShieldAlert, Ambulance, Bell, CheckCheck } from 'lucide-react';
+import { ChevronLeft, Download, UserPlus, Trash2, Users, AlertTriangle, ShieldAlert, Ambulance, Bell, CheckCheck, CheckCircle2, X } from 'lucide-react';
 import { Role, Profile } from '@/types';
 import { mockService } from '@/lib/mock-service';
 import { Badge } from '@/components/ui/Badge';
@@ -28,6 +28,10 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [notifications, setNotifications] = useState<any[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [activeNotifications, setActiveNotifications] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [toastNotif, setToastNotif] = useState<any | null>(null);
 
     useEffect(() => {
         // Load Profile from Service based on Role for Demo
@@ -61,6 +65,30 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
         return () => clearInterval(interval);
     }, []);
 
+    // Polling for unit-specific Toast notifications
+    useEffect(() => {
+        const unitId = currentProfile?.unit_id || 'Lote 101';
+        let lastSeenCount = 0;
+
+        const checkToast = async () => {
+            const unread = await mockService.getUnreadNotifications(unitId);
+            setActiveNotifications(unread);
+
+            // Show toast only when a NEW notification arrives
+            if (unread.length > lastSeenCount && unread.length > 0) {
+                setToastNotif(unread[0]);
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => setToastNotif(null), 5000);
+            }
+            lastSeenCount = unread.length;
+        };
+
+        checkToast();
+        const interval = setInterval(checkToast, 2000);
+        return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentProfile]);
+
     const handleAddTenant = (newTenant: Profile & { dni?: string; contract_end?: string }) => {
         setTenants([...tenants, newTenant]);
         setShowTenantModal(false);
@@ -85,6 +113,29 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
 
     return (
         <div className="max-w-md mx-auto min-h-[80vh] flex flex-col relative pb-32">
+
+            {/* FLOATING TOAST NOTIFICATION */}
+            {toastNotif && (
+                <div className="fixed top-24 right-6 z-50 max-w-sm animate-in slide-in-from-right-5 duration-300">
+                    <div className="bg-emerald-600 text-white p-4 rounded-xl shadow-2xl border border-emerald-500 flex gap-3 items-start">
+                        <CheckCircle2 size={24} className="flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm">{toastNotif.title || 'Nuevo Movimiento'}</p>
+                            <p className="text-emerald-100 text-xs mt-0.5">{toastNotif.message}</p>
+                            <p className="text-emerald-200/60 text-[10px] mt-1 font-mono">
+                                {new Date(toastNotif.timestamp).toLocaleTimeString()}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setToastNotif(null)}
+                            className="text-emerald-200 hover:text-white flex-shrink-0"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="mb-6 flex items-center gap-4">
                 {view !== 'home' && (
@@ -173,8 +224,8 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
                                                 setUnreadCount(mockService.getUnreadNotificationCount());
                                             }}
                                             className={`bg-white p-4 rounded-xl border shadow-sm cursor-pointer transition-all hover:shadow-md ${!notif.read
-                                                    ? 'border-blue-300 bg-blue-50/50'
-                                                    : 'border-slate-100'
+                                                ? 'border-blue-300 bg-blue-50/50'
+                                                : 'border-slate-100'
                                                 }`}
                                         >
                                             <p className={`text-sm font-medium ${!notif.read ? 'text-slate-900' : 'text-slate-600'}`}>

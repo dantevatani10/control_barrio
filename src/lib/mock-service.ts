@@ -470,6 +470,20 @@ class MockService {
     }
 
     // --- NOTIFICATIONS ---
+    async addNotification(unitId: string, title: string, message: string, type: 'success' | 'warning' | 'info') {
+        const notif = {
+            id: Date.now().toString(),
+            unitId,
+            title,
+            message,
+            type,
+            read: false,
+            timestamp: new Date().toISOString()
+        };
+        this.notifications.push(notif);
+        return notif;
+    }
+
     getNotifications() {
         return this.notifications.sort((a: { timestamp: string }, b: { timestamp: string }) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -478,6 +492,10 @@ class MockService {
 
     getUnreadNotificationCount() {
         return this.notifications.filter(n => !n.read).length;
+    }
+
+    async getUnreadNotifications(unitId: string) {
+        return this.notifications.filter(n => n.unitId === unitId && !n.read);
     }
 
     markNotificationAsRead(id: string) {
