@@ -22,6 +22,8 @@ class MockService {
     private vehicles: Vehicle[] = []; // Add vehicles property
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private emergencies: any[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private notifications: any[] = [];
 
     private constructor() {
         this.initialize();
@@ -368,7 +370,7 @@ class MockService {
     }
 
     recordEntry(data: Partial<AccessLog>) {
-        return this.logEntry({
+        const log = this.logEntry({
             ...data,
             details: {
                 guest_name: data.details?.guest_name || 'Desconocido',
@@ -378,6 +380,18 @@ class MockService {
                 vehicle_plate: data.details?.vehicle_plate
             }
         });
+
+        // Auto-generate notification for resident
+        this.notifications.push({
+            id: `notif-${Date.now()}`,
+            type: 'entry',
+            message: `✅ INGRESO AUTORIZADO: ${data.details?.guest_name || 'Visitante'} acaba de ingresar a tu lote.`,
+            unit: data.details?.unit || 'Sin unidad',
+            timestamp: new Date().toISOString(),
+            read: false
+        });
+
+        return log;
     }
 
     // --- WORKER MANAGEMENT ---
@@ -453,6 +467,26 @@ class MockService {
             return true;
         }
         return false;
+    }
+
+    // --- NOTIFICATIONS ---
+    getNotifications() {
+        return this.notifications.sort((a: { timestamp: string }, b: { timestamp: string }) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+    }
+
+    getUnreadNotificationCount() {
+        return this.notifications.filter(n => !n.read).length;
+    }
+
+    markNotificationAsRead(id: string) {
+        const notif = this.notifications.find(n => n.id === id);
+        if (notif) notif.read = true;
+    }
+
+    markAllNotificationsAsRead() {
+        this.notifications.forEach(n => n.read = true);
     }
 
     createGuard(data: { first_name: string; last_name: string; email: string; shift?: 'Mañana' | 'Tarde' | 'Noche' }) {

@@ -4,7 +4,7 @@ import WorkerList from './WorkerList';
 import VehicleList from './VehicleList';
 import AddTenantModal from './AddTenantModal';
 import AddFamilyMemberModal from './AddFamilyMemberModal';
-import { ChevronLeft, Download, UserPlus, Trash2, Users, AlertTriangle, ShieldAlert, Ambulance } from 'lucide-react';
+import { ChevronLeft, Download, UserPlus, Trash2, Users, AlertTriangle, ShieldAlert, Ambulance, Bell, CheckCheck } from 'lucide-react';
 import { Role, Profile } from '@/types';
 import { mockService } from '@/lib/mock-service';
 import { Badge } from '@/components/ui/Badge';
@@ -23,6 +23,11 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
 
     // Emergency S.O.S State
     const [showSOSModal, setShowSOSModal] = useState(false);
+
+    // Notifications State
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
         // Load Profile from Service based on Role for Demo
@@ -43,6 +48,18 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
             }
         }
     }, [role]);
+
+    // Polling for Notifications (every 2 seconds)
+    useEffect(() => {
+        const checkNotifications = () => {
+            setNotifications(mockService.getNotifications().slice(0, 10));
+            setUnreadCount(mockService.getUnreadNotificationCount());
+        };
+
+        checkNotifications(); // Initial
+        const interval = setInterval(checkNotifications, 2000);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleAddTenant = (newTenant: Profile & { dni?: string; contract_end?: string }) => {
         setTenants([...tenants, newTenant]);
@@ -115,6 +132,62 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
                         </div>
 
                         <QuickActions onViewChange={setView} role={role} currentProfile={currentProfile} />
+
+                        {/* Notifications Panel */}
+                        <div className="mt-6">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <Bell size={18} className="text-slate-500" />
+                                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Últimos Movimientos</h3>
+                                    {unreadCount > 0 && (
+                                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </div>
+                                {unreadCount > 0 && (
+                                    <button
+                                        onClick={() => {
+                                            mockService.markAllNotificationsAsRead();
+                                            setUnreadCount(0);
+                                            setNotifications(mockService.getNotifications().slice(0, 10));
+                                        }}
+                                        className="text-xs text-blue-600 font-bold flex items-center gap-1 hover:text-blue-800"
+                                    >
+                                        <CheckCheck size={14} /> Marcar leídas
+                                    </button>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                {notifications.length === 0 ? (
+                                    <div className="bg-white rounded-2xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">
+                                        No hay movimientos recientes.
+                                    </div>
+                                ) : (
+                                    notifications.map((notif: { id: string; message: string; timestamp: string; read: boolean }) => (
+                                        <div
+                                            key={notif.id}
+                                            onClick={() => {
+                                                mockService.markNotificationAsRead(notif.id);
+                                                setNotifications(mockService.getNotifications().slice(0, 10));
+                                                setUnreadCount(mockService.getUnreadNotificationCount());
+                                            }}
+                                            className={`bg-white p-4 rounded-xl border shadow-sm cursor-pointer transition-all hover:shadow-md ${!notif.read
+                                                    ? 'border-blue-300 bg-blue-50/50'
+                                                    : 'border-slate-100'
+                                                }`}
+                                        >
+                                            <p className={`text-sm font-medium ${!notif.read ? 'text-slate-900' : 'text-slate-600'}`}>
+                                                {notif.message}
+                                            </p>
+                                            <p className="text-[10px] text-slate-400 mt-1 font-mono">
+                                                {new Date(notif.timestamp).toLocaleTimeString()}
+                                            </p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </>
                 )}
                 {view === 'workers' && <WorkerList />}

@@ -17,7 +17,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <Link
-              href="/dashboard/demo"
+              href="/dashboard/admin"
               className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors hidden sm:block"
             >
               Ver Demo Live
@@ -47,7 +47,7 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row gap-4 mb-16">
                 <Link
-                  href="/dashboard/demo"
+                  href="/dashboard/admin"
                   className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/30 hover:-translate-y-1"
                 >
                   Ver Demo Activa <ArrowRight size={20} />
@@ -59,25 +59,25 @@ export default function Home() {
 
               <div className="flex flex-col gap-4 w-full max-w-sm">
                 <button
-                  onClick={() => window.location.href = '/dashboard/demo?role=admin'}
+                  onClick={() => window.location.href = '/dashboard/admin'}
                   className="bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
                 >
                   Login como Admin
                 </button>
                 <button
-                  onClick={() => window.location.href = '/dashboard/demo?role=guard'}
+                  onClick={() => window.location.href = '/dashboard/guard'}
                   className="bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
                 >
                   Login como Guardia (Mobile)
                 </button>
                 <button
-                  onClick={() => window.location.href = '/dashboard/demo?role=owner'}
+                  onClick={() => window.location.href = '/dashboard/owner'}
                   className="bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
                 >
                   Login como Propietario
                 </button>
                 <button
-                  onClick={() => window.location.href = '/dashboard/demo?role=tenant'}
+                  onClick={() => window.location.href = '/dashboard/tenant'}
                   className="bg-orange-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-orange-600 transition-all flex items-center justify-center gap-2"
                 >
                   Login como Inquilino
@@ -109,7 +109,7 @@ export default function Home() {
             {/* Demo Showcase Card */}
             <div className="relative lg:h-[600px] flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 to-purple-50 rounded-full blur-3xl opacity-60"></div>
-              <Link href="/dashboard/demo" className="relative group cursor-pointer w-full max-w-md">
+              <Link href="/dashboard/admin" className="relative group cursor-pointer w-full max-w-md">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
                   {/* Fake Browser Header */}
