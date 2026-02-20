@@ -25,6 +25,14 @@ class MockService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private notifications: any[] = [];
 
+    private financialMetrics = {
+        totalCollected: 25977841.40,
+        totalDebt: 27547493.11,
+        baseExpense: 283339.45,
+        unidentifiedDeposits: 0,
+        totalExpenses: 25883872.78
+    };
+
     private constructor() {
         this.initialize();
     }
@@ -59,14 +67,47 @@ class MockService {
             created_at: new Date().toISOString()
         }));
 
-        this.units = seedData.units.map(u => ({
+        // Real lots from Barrio Santa Clara
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const realUnits: any[] = [
+            { id: '2', number: 'UF 2', type: 'house', status: 'occupied', residentName: 'Tornquist, María G', debt: 393289.02 },
+            { id: '3', number: 'UF 3', type: 'house', status: 'occupied', residentName: 'Lago, German', debt: 393595.03 },
+            { id: '15', number: 'UF 15', type: 'house', status: 'occupied', residentName: 'García, Roberto', debt: 0.00 },
+            { id: '24', number: 'UF 24', type: 'house', status: 'occupied', residentName: 'Martínez, Florencia', debt: 0.00 },
+            { id: '60', number: 'UF 60', type: 'house', status: 'occupied', residentName: 'Vizzoco, Santiago', debt: 393192.60 },
+            { id: '61', number: 'UF 61', type: 'house', status: 'occupied', residentName: 'Candau, María José', debt: 393283.61 },
+            { id: '62', number: 'UF 62', type: 'house', status: 'construction', residentName: 'Departamentos (Consorcio)', debt: 716286.05 }
+        ];
+        const existingIds = realUnits.map(u => u.id);
+        for (let i = 1; i <= 62; i++) {
+            if (!existingIds.includes(i.toString())) {
+                realUnits.push({
+                    id: i.toString(),
+                    number: `UF ${i}`,
+                    type: 'house',
+                    status: 'occupied',
+                    residentName: `Familia Lote ${i}`,
+                    debt: 0
+                });
+            }
+        }
+        realUnits.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+
+        // Map to Unit type for compatibility
+        this.units = realUnits.map(u => ({
             id: u.id,
-            community_id: u.community_id,
-            unit_number: u.name,
-            status: u.status as UnitStatus,
-            owner_id: 'owner1', // Hardcoded link for demo
-            tenant_id: 'tenant1' // Hardcoded link
-        }));
+            community_id: 'c1',
+            unit_number: u.number,
+            status: u.debt > 0 ? 'overdue' as UnitStatus : 'up_to_date' as UnitStatus,
+            owner_id: 'owner1',
+            tenant_id: 'tenant1',
+            // Extended fields for financial display
+            residentName: u.residentName,
+            debt: u.debt,
+            type: u.type,
+            lotStatus: u.status
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any));
 
         this.invitations = seedData.invitations.map(i => ({
             id: i.id,
@@ -505,6 +546,10 @@ class MockService {
 
     markAllNotificationsAsRead() {
         this.notifications.forEach(n => n.read = true);
+    }
+
+    getFinancialMetrics() {
+        return this.financialMetrics;
     }
 
     createGuard(data: { first_name: string; last_name: string; email: string; shift?: 'Mañana' | 'Tarde' | 'Noche' }) {

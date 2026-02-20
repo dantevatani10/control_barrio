@@ -7,11 +7,13 @@ import {
     LayoutDashboard, Users, FileText, Settings,
     Plus, Search, Trash2, Home, Phone, UserPlus,
     X, Save, CheckCircle, Shield, Briefcase, Clock,
-    Download, ArrowLeft, AlertCircle, FileCheck, Ban, Check
+    Download, ArrowLeft, AlertCircle, FileCheck, Ban, Check,
+    Wallet, TrendingDown
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
+import KPIGrid from './KPIGrid';
 
 export default function AdminDashboard() {
     const [mounted, setMounted] = useState(false);
@@ -171,58 +173,97 @@ export default function AdminDashboard() {
 
                 {/* --- MAIN MENU --- */}
                 {activeModule === 'menu' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4">
-                        <button
-                            onClick={() => setActiveModule('lots')}
-                            className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all text-left flex flex-col gap-4 border-l-8 border-blue-500 group"
-                        >
-                            <div className="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                <Home size={40} />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-800">Gestión de Lotes y Vecinos</h2>
-                                <p className="text-slate-500 text-lg">Ver padrón, crear lotes, gestionar familias.</p>
-                            </div>
-                        </button>
+                    <div className="animate-in fade-in slide-in-from-bottom-4">
 
-                        <button
-                            onClick={() => setActiveModule('workers')}
-                            className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all text-left flex flex-col gap-4 border-l-8 border-orange-500 group"
-                        >
-                            <div className="bg-orange-100 w-16 h-16 rounded-2xl flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                                <Briefcase size={40} />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-800">Aprobar Trabajadores (ART)</h2>
-                                <p className="text-slate-500 text-lg">Revisar seguros y autorizar ingresos.</p>
-                            </div>
-                        </button>
+                        {/* Financial KPIs */}
+                        <KPIGrid />
 
-                        <button
-                            onClick={() => setActiveModule('guards')}
-                            className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all text-left flex flex-col gap-4 border-l-8 border-indigo-500 group"
-                        >
-                            <div className="bg-indigo-100 w-16 h-16 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                <Shield size={40} />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-800">Personal de Guardia</h2>
-                                <p className="text-slate-500 text-lg">Gestionar guardias y asignar turnos.</p>
-                            </div>
-                        </button>
+                        {/* Delinquency Alert Widget */}
+                        {(() => {
+                            const debtors = units
+                                .filter((u: any) => (u as any).debt > 0)
+                                .sort((a: any, b: any) => (b as any).debt - (a as any).debt)
+                                .slice(0, 5);
+                            if (debtors.length === 0) return null;
+                            return (
+                                <div className="bg-white border border-rose-200 rounded-2xl p-6 mb-8 shadow-sm">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="bg-rose-100 p-2 rounded-full text-rose-600">
+                                            <TrendingDown size={18} />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Alerta de Morosidad — Top Deudores</h3>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {debtors.map((u: any) => (
+                                            <div key={u.id} className="flex items-center justify-between bg-rose-50/60 px-4 py-3 rounded-xl">
+                                                <div>
+                                                    <p className="font-bold text-slate-800 text-sm">{(u as any).residentName}</p>
+                                                    <p className="text-xs text-slate-500">{u.unit_number}</p>
+                                                </div>
+                                                <span className="text-rose-600 font-extrabold text-sm">
+                                                    {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format((u as any).debt)}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })()}
 
-                        <button
-                            onClick={() => setActiveModule('history')}
-                            className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all text-left flex flex-col gap-4 border-l-8 border-emerald-500 group"
-                        >
-                            <div className="bg-emerald-100 w-16 h-16 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                <FileText size={40} />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-800">Historial de Accesos</h2>
-                                <p className="text-slate-500 text-lg">Ver registros y exportar a Excel.</p>
-                            </div>
-                        </button>
+                        {/* Menu Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <button
+                                onClick={() => setActiveModule('lots')}
+                                className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all text-left flex flex-col gap-4 border-l-8 border-blue-500 group"
+                            >
+                                <div className="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                    <Home size={40} />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-800">Gestión de Lotes y Vecinos</h2>
+                                    <p className="text-slate-500 text-lg">Ver padrón, crear lotes, gestionar familias.</p>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => setActiveModule('workers')}
+                                className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all text-left flex flex-col gap-4 border-l-8 border-orange-500 group"
+                            >
+                                <div className="bg-orange-100 w-16 h-16 rounded-2xl flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                                    <Briefcase size={40} />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-800">Aprobar Trabajadores (ART)</h2>
+                                    <p className="text-slate-500 text-lg">Revisar seguros y autorizar ingresos.</p>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => setActiveModule('guards')}
+                                className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all text-left flex flex-col gap-4 border-l-8 border-indigo-500 group"
+                            >
+                                <div className="bg-indigo-100 w-16 h-16 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                    <Shield size={40} />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-800">Personal de Guardia</h2>
+                                    <p className="text-slate-500 text-lg">Gestionar guardias y asignar turnos.</p>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => setActiveModule('history')}
+                                className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all text-left flex flex-col gap-4 border-l-8 border-emerald-500 group"
+                            >
+                                <div className="bg-emerald-100 w-16 h-16 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                    <FileText size={40} />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-800">Historial de Accesos</h2>
+                                    <p className="text-slate-500 text-lg">Ver registros y exportar a Excel.</p>
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 )}
 
