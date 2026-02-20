@@ -24,12 +24,16 @@ export default function AdminDashboard() {
     const [workers, setWorkers] = useState<DemoWorker[]>([]); // Using DemoWorker type internally
     const [guards, setGuards] = useState<Profile[]>([]);
     const [logs, setLogs] = useState<AccessLog[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [metrics, setMetrics] = useState<any>(null);
 
     const refreshAllData = () => {
         setUnits(mockService.getUnits());
         setWorkers(mockService.getWorkers());
         setGuards(mockService.getGuards());
         setLogs(mockService.getAllLogs());
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setMetrics(mockService.getFinancialMetrics());
     };
 
     useEffect(() => {
@@ -178,11 +182,48 @@ export default function AdminDashboard() {
                         {/* Financial KPIs */}
                         <KPIGrid />
 
+                        {/* Collection Rate Progress Bar */}
+                        {metrics && (
+                            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8 mt-4">
+                                <div className="flex justify-between items-end mb-4">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-800">Tasa de Cobranza (Mes Actual)</h3>
+                                        <p className="text-sm text-slate-500">Recaudación efectiva vs. Saldo deudor total</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-2xl font-extrabold text-blue-600">
+                                            {Math.round((metrics.totalCollected / (metrics.totalCollected + metrics.totalDebt)) * 100)}%
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Barra de progreso */}
+                                <div className="w-full bg-rose-100 rounded-full h-4 mb-2 flex overflow-hidden">
+                                    <div
+                                        className="bg-blue-500 h-4 rounded-full transition-all duration-1000 ease-out"
+                                        style={{ width: `${(metrics.totalCollected / (metrics.totalCollected + metrics.totalDebt)) * 100}%` }}
+                                    ></div>
+                                </div>
+
+                                <div className="flex justify-between text-xs font-medium mt-2">
+                                    <div className="flex items-center gap-1.5 text-blue-700">
+                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                        Cobrado: $ {metrics.totalCollected.toLocaleString('es-AR')}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-rose-700">
+                                        <div className="w-3 h-3 rounded-full bg-rose-400"></div>
+                                        Pendiente: $ {metrics.totalDebt.toLocaleString('es-AR')}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Delinquency Alert Widget */}
+                        {/* eslint-disable @typescript-eslint/no-explicit-any */}
                         {(() => {
                             const debtors = units
-                                .filter((u: any) => (u as any).debt > 0)
-                                .sort((a: any, b: any) => (b as any).debt - (a as any).debt)
+                                .filter((u) => (u as any).debt > 0)
+                                .sort((a, b) => ((b as any).debt || 0) - ((a as any).debt || 0))
                                 .slice(0, 5);
                             if (debtors.length === 0) return null;
                             return (
@@ -197,11 +238,11 @@ export default function AdminDashboard() {
                                         {debtors.map((u: any) => (
                                             <div key={u.id} className="flex items-center justify-between bg-rose-50/60 px-4 py-3 rounded-xl">
                                                 <div>
-                                                    <p className="font-bold text-slate-800 text-sm">{(u as any).residentName}</p>
+                                                    <p className="font-bold text-slate-800 text-sm">{u.residentName}</p>
                                                     <p className="text-xs text-slate-500">{u.unit_number}</p>
                                                 </div>
                                                 <span className="text-rose-600 font-extrabold text-sm">
-                                                    {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format((u as any).debt)}
+                                                    {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(u.debt)}
                                                 </span>
                                             </div>
                                         ))}
@@ -209,6 +250,7 @@ export default function AdminDashboard() {
                                 </div>
                             );
                         })()}
+                        {/* eslint-enable @typescript-eslint/no-explicit-any */}
 
                         {/* Menu Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

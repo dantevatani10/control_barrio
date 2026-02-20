@@ -4,7 +4,7 @@ import WorkerList from './WorkerList';
 import VehicleList from './VehicleList';
 import AddTenantModal from './AddTenantModal';
 import AddFamilyMemberModal from './AddFamilyMemberModal';
-import { ChevronLeft, Download, UserPlus, Trash2, Users, AlertTriangle, ShieldAlert, Ambulance, Bell, CheckCheck, CheckCircle2, X, CalendarClock, Info, Megaphone } from 'lucide-react';
+import { ChevronLeft, Download, UserPlus, Trash2, Users, AlertTriangle, ShieldAlert, Ambulance, Bell, CheckCheck, CheckCircle2, X, CalendarClock, Info, Megaphone, Package } from 'lucide-react';
 import { Role, Profile } from '@/types';
 import { mockService } from '@/lib/mock-service';
 import { Badge } from '@/components/ui/Badge';
@@ -37,6 +37,10 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [toastNotif, setToastNotif] = useState<any | null>(null);
 
+    // Package State
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [packages, setPackages] = useState<any[]>([]);
+
     useEffect(() => {
         // Load Profile from Service based on Role for Demo
         const profile = mockService.login(role);
@@ -62,6 +66,18 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
         const myUnit = allUnits.find((u: any) => u.id === '61');
         if (myUnit) setCurrentUnit(myUnit);
     }, [role]);
+
+    // Polling for package notifications
+    useEffect(() => {
+        const loadPackages = async () => {
+            const unread = await mockService.getUnreadNotifications('61');
+            const packageNotifs = unread.filter((n: { type: string; title: string }) => n.type === 'info' && n.title.includes('Paquete'));
+            setPackages(packageNotifs);
+        };
+        loadPackages();
+        const interval = setInterval(loadPackages, 3000);
+        return () => clearInterval(interval);
+    }, []);
 
     // Polling for Notifications (every 2 seconds)
     useEffect(() => {
@@ -201,6 +217,30 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
                                     <p className="text-xl font-bold text-emerald-700">Gracias por su pago.</p>
                                     <p className="text-emerald-500 text-xs mt-1 font-medium">Su lote no registra deuda pendiente.</p>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Package Alert Banner */}
+                        {packages.length > 0 && (
+                            <div className="mb-6 bg-blue-50 border-2 border-blue-400 rounded-2xl p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between shadow-lg">
+                                <div className="flex items-center gap-4 mb-4 sm:mb-0">
+                                    <div className="bg-blue-600 p-3 rounded-full text-white shadow-md">
+                                        <Package size={28} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-blue-900 font-extrabold text-lg">¡Tienes {packages.length} paquete(s) en guardia!</h3>
+                                        <p className="text-blue-700 font-medium text-sm">{packages[0].message}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        packages.forEach(p => mockService.markNotificationAsRead(p.id));
+                                        setPackages([]);
+                                    }}
+                                    className="bg-white text-blue-700 font-bold border-2 border-blue-200 py-2 px-6 rounded-xl hover:bg-blue-100 transition-colors w-full sm:w-auto"
+                                >
+                                    Marcar como retirado
+                                </button>
                             </div>
                         )}
 

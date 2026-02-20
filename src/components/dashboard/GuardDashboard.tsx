@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { mockService } from '@/lib/mock-service';
 import {
-    Scan, Search, LogOut, Phone, Shield,
+    Scan, Search, LogOut, Phone, Shield, Package,
     List, User, RefreshCw, XCircle, CheckCircle,
     LayoutDashboard, LogIn, Menu, X, PlusCircle,
     MessageCircle, Contact
@@ -313,6 +313,25 @@ export default function GuardDashboard() {
                             >
                                 <PlusCircle size={24} className="text-blue-600" />
                                 <span className="text-lg font-bold">REGISTRAR VISITANTE MANUAL</span>
+                            </button>
+                        </div>
+
+                        {/* Block 3: Package Reception */}
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Paquetería</h3>
+                            <button
+                                onClick={() => {
+                                    const lote = prompt('Ingrese el número de Lote/UF (ej: 61):');
+                                    if (!lote) return;
+                                    const empresa = prompt('Empresa de correo (ej: MercadoLibre, Andreani):', 'MercadoLibre');
+                                    if (!empresa) return;
+                                    mockService.registerPackage(lote, empresa);
+                                    alert(`✅ Paquete registrado para el Lote ${lote}. Se notificó al propietario.`);
+                                }}
+                                className="w-full bg-white text-blue-600 p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-500 hover:bg-blue-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                            >
+                                <Package size={24} className="text-blue-600" />
+                                <span className="text-lg font-bold">RECIBIR PAQUETE</span>
                             </button>
                         </div>
                     </div>

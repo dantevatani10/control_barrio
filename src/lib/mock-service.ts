@@ -552,6 +552,13 @@ class MockService {
         return this.financialMetrics;
     }
 
+    async registerPackage(unitId: string, company: string, trackingInfo: string = '') {
+        const title = '📦 Nuevo Paquete en Guardia';
+        const message = `Tienes un paquete de ${company} esperando ser retirado. ${trackingInfo ? 'Ref: ' + trackingInfo : ''}`;
+        const notif = await this.addNotification(unitId, title, message, 'info');
+        return notif;
+    }
+
     createGuard(data: { first_name: string; last_name: string; email: string; shift?: 'Mañana' | 'Tarde' | 'Noche' }) {
         const newGuard: Profile = {
             id: `g-${Date.now()}`,
