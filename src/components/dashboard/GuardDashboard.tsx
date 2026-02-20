@@ -6,13 +6,14 @@ import {
     Scan, Search, LogOut, Phone, Shield, Package,
     List, User, RefreshCw, XCircle, CheckCircle,
     LayoutDashboard, LogIn, Menu, X, PlusCircle,
-    MessageCircle, Contact
+    MessageCircle, Contact, CalendarClock
 } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { clsx } from 'clsx';
 import { Unit, AccessLog, Invitation, Profile } from '@/types';
 import { DemoWorker } from '@/lib/mock-service';
 import { Modal } from '@/components/ui/Modal';
+import { toast } from '@/components/ui/Toast';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Emergency = any;
@@ -25,11 +26,17 @@ export default function GuardDashboard() {
     const [stats, setStats] = useState({ people_inside: 0, visits_today: 0 });
     const [activeEmergencies, setActiveEmergencies] = useState<Emergency[]>([]);
 
+    const [expectedVisits, setExpectedVisits] = useState<{ id: string; name: string; dni?: string; unit?: string; plate?: string; type: string; status: string }[]>([]);
+
     // Dashboard State
     const [isScanning, setIsScanning] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [scanResult, setScanResult] = useState<{ valid: boolean; reason?: string; entity?: Invitation | DemoWorker | any; timestamp?: string } | null>(null);
     const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+
+    // Package Modal State
+    const [showPackageModal, setShowPackageModal] = useState(false);
+    const [packageData, setPackageData] = useState({ unit: '', company: 'MercadoLibre' });
 
     // Manual Entry Form State
     const [manualEntryData, setManualEntryData] = useState({
@@ -55,6 +62,8 @@ export default function GuardDashboard() {
     async function refreshData() {
         setStats(mockService.getStats());
         setPeopleInside(mockService.getAllActiveVisits());
+        setActiveEmergencies(await mockService.getActiveEmergencies());
+        setExpectedVisits(mockService.getActiveInvitationsForToday());
         setDirectory(await mockService.getDirectory());
         setUnits(mockService.getUnits());
     }
@@ -67,21 +76,6 @@ export default function GuardDashboard() {
 
     // Refresh data whenever tab changes or action is taken
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        refreshData();
-    }, [activeTab]);
-
-    // Polling for Active Emergencies
-    useEffect(() => {
-        const checkEmergencies = async () => {
-            const emergencies = await mockService.getActiveEmergencies();
-            setActiveEmergencies(emergencies);
-        };
-
-        checkEmergencies(); // Initial check
-        const interval = setInterval(checkEmergencies, 2000);
-
-        return () => clearInterval(interval);
     }, []);
 
 
@@ -302,6 +296,50 @@ export default function GuardDashboard() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Expected Visits List */}
+                            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col mt-4 md:mt-0 md:col-span-2">
+                                <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                    <CalendarClock size={16} className="text-blue-500" />
+                                    Visitas Esperadas Hoy ({expectedVisits.length})
+                                </h4>
+                                <div className="flex-1 overflow-y-auto max-h-40 space-y-2 pr-1">
+                                    {expectedVisits.length > 0 ? expectedVisits.map((res) => (
+                                        <div key={res.id} className="flex justify-between items-center bg-slate-50 border border-slate-100 p-3 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-800">{res.name}</p>
+                                                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                                                    Lote {res.unit} • {res.plate ? `🚗 ${res.plate.toUpperCase()}` : '🚶‍♂️ Peatonal'}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    mockService.recordEntry({
+                                                        actor_name: 'Guardia',
+                                                        method: 'manual',
+                                                        details: {
+                                                            guest_name: res.name,
+                                                            guest_dni: res.dni,
+                                                            unit: res.unit || 'Invitado',
+                                                            direction: 'in',
+                                                            vehicle_plate: res.plate
+                                                        }
+                                                    });
+                                                    alert(`Ingreso registrado: ${res.name}`);
+                                                    refreshData();
+                                                }}
+                                                className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors active:scale-95"
+                                            >
+                                                DAR INGRESO
+                                            </button>
+                                        </div>
+                                    )) : (
+                                        <div className="text-center py-6">
+                                            <p className="text-sm text-slate-400">No hay visitas programadas para hoy.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* Block 2: Spontaneous Entry */}
@@ -320,14 +358,7 @@ export default function GuardDashboard() {
                         <div>
                             <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Paquetería</h3>
                             <button
-                                onClick={() => {
-                                    const lote = prompt('Ingrese el número de Lote/UF (ej: 61):');
-                                    if (!lote) return;
-                                    const empresa = prompt('Empresa de correo (ej: MercadoLibre, Andreani):', 'MercadoLibre');
-                                    if (!empresa) return;
-                                    mockService.registerPackage(lote, empresa);
-                                    alert(`✅ Paquete registrado para el Lote ${lote}. Se notificó al propietario.`);
-                                }}
+                                onClick={() => setShowPackageModal(true)}
                                 className="w-full bg-white text-blue-600 p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-500 hover:bg-blue-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                             >
                                 <Package size={24} className="text-blue-600" />
@@ -336,7 +367,6 @@ export default function GuardDashboard() {
                         </div>
                     </div>
                 )}
-
 
                 {/* --- VISTA B: EN PREDIO --- */}
                 {activeTab === 'inside' && (
@@ -379,69 +409,72 @@ export default function GuardDashboard() {
                             )}
                         </div>
                     </div>
-                )}
+                )
+                }
 
 
                 {/* --- VISTA C: DIRECTORIO --- */}
-                {activeTab === 'directory' && (
-                    <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4">
-                        <header className="mb-4 md:mb-6">
-                            <h2 className="text-xl md:text-2xl font-bold text-slate-800">Directorio y Contacto</h2>
-                            <p className="text-xs md:text-sm text-slate-500">Contactar a propietarios e inquilinos.</p>
-                        </header>
+                {
+                    activeTab === 'directory' && (
+                        <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+                            <header className="mb-4 md:mb-6">
+                                <h2 className="text-xl md:text-2xl font-bold text-slate-800">Directorio y Contacto</h2>
+                                <p className="text-xs md:text-sm text-slate-500">Contactar a propietarios e inquilinos.</p>
+                            </header>
 
-                        <div className="space-y-3">
-                            {directory.map((item, idx) => {
-                                const cleanPhone = item.phone ? item.phone.replace(/\D/g, '') : '';
-                                return (
-                                    <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex flex-col items-center justify-center w-10 h-10 bg-blue-50 rounded-lg text-blue-700 font-bold text-xs">
-                                                <span>{item.unit?.split(' ')[1] || 'S/L'}</span>
+                            <div className="space-y-3">
+                                {directory.map((item, idx) => {
+                                    const cleanPhone = item.phone ? item.phone.replace(/\D/g, '') : '';
+                                    return (
+                                        <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex flex-col items-center justify-center w-10 h-10 bg-blue-50 rounded-lg text-blue-700 font-bold text-xs">
+                                                    <span>{item.unit?.split(' ')[1] || 'S/L'}</span>
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-slate-900 text-sm md:text-base">{item.name}</h3>
+                                                    <p className="text-[10px] md:text-xs text-slate-500 uppercase flex items-center gap-1">
+                                                        {item.role}
+                                                        {item.phone && <span className="text-slate-400 hidden sm:inline">• {item.phone}</span>}
+                                                    </p>
+                                                    {/* Mobile visible phone */}
+                                                    {item.phone && <p className="text-xs text-slate-400 sm:hidden mt-0.5">{item.phone}</p>}
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-slate-900 text-sm md:text-base">{item.name}</h3>
-                                                <p className="text-[10px] md:text-xs text-slate-500 uppercase flex items-center gap-1">
-                                                    {item.role}
-                                                    {item.phone && <span className="text-slate-400 hidden sm:inline">• {item.phone}</span>}
-                                                </p>
-                                                {/* Mobile visible phone */}
-                                                {item.phone && <p className="text-xs text-slate-400 sm:hidden mt-0.5">{item.phone}</p>}
+
+                                            <div className="flex gap-2">
+                                                {/* WhatsApp Button */}
+                                                {item.phone && (
+                                                    <a
+                                                        href={`https://wa.me/${cleanPhone}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="bg-green-500 text-white p-3 rounded-full shadow-sm shadow-green-200 active:scale-95 transition-transform"
+                                                        title="Enviar WhatsApp"
+                                                    >
+                                                        <MessageCircle size={20} />
+                                                    </a>
+                                                )}
+
+                                                {/* Call Button */}
+                                                {item.phone && (
+                                                    <a
+                                                        href={`tel:${item.phone}`}
+                                                        className="bg-blue-50 text-blue-600 p-3 rounded-full border border-blue-100 active:scale-95 transition-transform"
+                                                        title="Llamar"
+                                                    >
+                                                        <Phone size={20} />
+                                                    </a>
+                                                )}
                                             </div>
                                         </div>
-
-                                        <div className="flex gap-2">
-                                            {/* WhatsApp Button */}
-                                            {item.phone && (
-                                                <a
-                                                    href={`https://wa.me/${cleanPhone}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="bg-green-500 text-white p-3 rounded-full shadow-sm shadow-green-200 active:scale-95 transition-transform"
-                                                    title="Enviar WhatsApp"
-                                                >
-                                                    <MessageCircle size={20} />
-                                                </a>
-                                            )}
-
-                                            {/* Call Button */}
-                                            {item.phone && (
-                                                <a
-                                                    href={`tel:${item.phone}`}
-                                                    className="bg-blue-50 text-blue-600 p-3 rounded-full border border-blue-100 active:scale-95 transition-transform"
-                                                    title="Llamar"
-                                                >
-                                                    <Phone size={20} />
-                                                </a>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
-                    </div>
-                )}
-            </main>
+                    )
+                }
+            </main >
 
 
             {/* --- MODALS --- */}
@@ -649,6 +682,36 @@ export default function GuardDashboard() {
                 )
             }
 
-        </div>
+            {/* PACKAGE MODAL */}
+            <Modal isOpen={showPackageModal} onClose={() => setShowPackageModal(false)} title="📦 Registrar Paquete">
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Número de Lote / UF</label>
+                        <input type="text" placeholder="Ej: 61" className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                            value={packageData.unit} onChange={e => setPackageData({ ...packageData, unit: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Empresa de Correo</label>
+                        <select className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                            value={packageData.company} onChange={e => setPackageData({ ...packageData, company: e.target.value })}>
+                            <option>MercadoLibre</option><option>Andreani</option><option>Correo Argentino</option><option>Amazon</option><option>Otro</option>
+                        </select>
+                    </div>
+                    <button
+                        onClick={() => {
+                            if (!packageData.unit) return toast.error('Ingrese un lote válido');
+                            mockService.registerPackage(packageData.unit, packageData.company);
+                            toast.success(`Paquete registrado para Lote ${packageData.unit}`);
+                            setShowPackageModal(false);
+                            setPackageData({ unit: '', company: 'MercadoLibre' });
+                        }}
+                        className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors mt-2"
+                    >
+                        Confirmar Recepción
+                    </button>
+                </div>
+            </Modal>
+
+        </div >
     );
 }

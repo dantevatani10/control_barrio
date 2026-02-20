@@ -4,10 +4,13 @@ import WorkerList from './WorkerList';
 import VehicleList from './VehicleList';
 import AddTenantModal from './AddTenantModal';
 import AddFamilyMemberModal from './AddFamilyMemberModal';
+import NewInvitationModal from './NewInvitationModal';
 import { ChevronLeft, Download, UserPlus, Trash2, Users, AlertTriangle, ShieldAlert, Ambulance, Bell, CheckCheck, CheckCircle2, X, CalendarClock, Info, Megaphone, Package } from 'lucide-react';
 import { Role, Profile } from '@/types';
 import { mockService } from '@/lib/mock-service';
 import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
+import { toast } from '@/components/ui/Toast';
 
 export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
     const [view, setView] = useState('home'); // home, workers, vehicles, tenants, family
@@ -40,6 +43,13 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
     // Package State
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [packages, setPackages] = useState<any[]>([]);
+
+    // Claim Modal State
+    const [showClaimModal, setShowClaimModal] = useState(false);
+    const [claimText, setClaimText] = useState('');
+
+    // Invitation Modal State
+    const [showInviteModal, setShowInviteModal] = useState(false);
 
     useEffect(() => {
         // Load Profile from Service based on Role for Demo
@@ -244,11 +254,11 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
                             </div>
                         )}
 
-                        <QuickActions onViewChange={setView} role={role} currentProfile={currentProfile} />
+                        <QuickActions onViewChange={setView} role={role} currentProfile={currentProfile} onInviteClick={() => setShowInviteModal(true)} />
 
                         {/* Complaint Quick Action */}
                         <button
-                            onClick={() => alert('📋 Formulario de reclamo en desarrollo para la demo. ¡Próximamente podrás enviar sugerencias directamente al administrador!')}
+                            onClick={() => setShowClaimModal(true)}
                             className="w-full mt-4 bg-white border-2 border-dashed border-slate-300 rounded-2xl p-4 flex items-center gap-3 text-slate-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50 transition-all active:scale-[0.98]"
                         >
                             <div className="bg-slate-100 p-2.5 rounded-xl">
@@ -470,6 +480,40 @@ export default function OwnerDashboard({ role = 'owner' }: { role?: Role }) {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* CLAIM MODAL */}
+            <Modal isOpen={showClaimModal} onClose={() => setShowClaimModal(false)} title="📢 Enviar Reclamo o Sugerencia">
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-500">Este mensaje será enviado directamente a la administración del barrio.</p>
+                    <textarea
+                        rows={4}
+                        placeholder="Describa su reclamo aquí..."
+                        className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                        value={claimText} onChange={e => setClaimText(e.target.value)}
+                    />
+                    <button
+                        onClick={() => {
+                            if (!claimText.trim()) return toast.error('El reclamo no puede estar vacío');
+                            toast.success('Su reclamo ha sido enviado con éxito.');
+                            setShowClaimModal(false);
+                            setClaimText('');
+                        }}
+                        className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors mt-2"
+                    >
+                        Enviar a Administración
+                    </button>
+                </div>
+            </Modal>
+
+            {/* INVITATION MODAL */}
+            {currentUnit && (
+                <NewInvitationModal
+                    isOpen={showInviteModal}
+                    onClose={() => setShowInviteModal(false)}
+                    unitNumber={currentUnit?.unit_number || 'Lote 61'}
+                    residentName={currentUnit?.residentName || currentProfile?.first_name || 'Propietario'}
+                />
             )}
         </div>
     );

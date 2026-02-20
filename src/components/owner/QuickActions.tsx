@@ -1,35 +1,29 @@
 import { Role, Profile } from '@/types';
-import { UserPlus, HardHat, Car, Share2, CreditCard, AlertCircle, Users } from 'lucide-react';
-import { shareData } from '@/utils/share';
+import { UserPlus, Car, Share2, CreditCard, AlertCircle, Users } from 'lucide-react';
+import { toast } from '@/components/ui/Toast';
 
 interface QuickActionsProps {
     onViewChange: (view: string) => void;
     role: Role;
     currentProfile?: Profile;
+    onInviteClick?: () => void;
 }
 
-export default function QuickActions({ onViewChange, role, currentProfile }: QuickActionsProps) {
+export default function QuickActions({ onViewChange, role, currentProfile, onInviteClick }: QuickActionsProps) {
 
-    // Check permission - Default to true if not defined (legacy/admin)
+    // Check permission - Default to true if not defined
     const canInvite = currentProfile?.can_invite_guests !== false;
 
-    const handleInvite = async () => {
+    const handleInvite = () => {
         if (!canInvite) {
-            alert('Acceso Restringido: Al ser menor de 15 años, no puedes generar invitaciones.');
+            toast?.error ? toast.error('Acceso Restringido: Al ser menor, no puedes generar invitaciones.') : alert('Acceso Restringido');
             return;
         }
 
-        // Simulate WhatsApp Invite Flow
-        const inviteLink = `https://accesobarrio.com/invite/${Math.random().toString(36).substring(7)}`;
-        const text = `Hola! Te invito a casa. Ingresá con este QR: ${inviteLink}`;
-
-        await shareData({
-            title: 'Invitación a Barrio Santa Clara',
-            text: text,
-            url: inviteLink
-        });
-
-        alert('Simulación: Se abrió WhatsApp con el link:\n\n' + text);
+        // Abrir el modal nuevo
+        if (onInviteClick) {
+            onInviteClick();
+        }
     };
 
     return (
@@ -44,7 +38,7 @@ export default function QuickActions({ onViewChange, role, currentProfile }: Qui
                 <div className={`p-3 rounded-full ${canInvite ? 'bg-white/20' : 'bg-gray-200 text-gray-500'}`}>
                     {canInvite ? <Share2 size={28} /> : <AlertCircle size={28} />}
                 </div>
-                <span className="font-bold">{canInvite ? 'Invitar Visita' : 'No Habilitado'}</span>
+                <span className="font-bold text-sm">{canInvite ? 'Invitar Visita' : 'No Habilitado'}</span>
             </button>
 
             <button
@@ -54,7 +48,7 @@ export default function QuickActions({ onViewChange, role, currentProfile }: Qui
                 <div className="bg-orange-50 text-orange-600 p-3 rounded-full">
                     <Users size={28} />
                 </div>
-                <span className="font-bold">Trabajadores</span>
+                <span className="font-bold text-sm">Trabajadores</span>
             </button>
 
             <button
@@ -64,7 +58,7 @@ export default function QuickActions({ onViewChange, role, currentProfile }: Qui
                 <div className="bg-indigo-50 text-indigo-600 p-3 rounded-full">
                     <Car size={28} />
                 </div>
-                <span className="font-bold">Mis Vehículos</span>
+                <span className="font-bold text-sm">Mis Vehículos</span>
             </button>
 
             {(role === 'owner' || role === 'tenant') && (
@@ -77,7 +71,7 @@ export default function QuickActions({ onViewChange, role, currentProfile }: Qui
                             <div className="bg-green-50 text-green-600 p-3 rounded-full">
                                 <UserPlus size={28} />
                             </div>
-                            <span className="font-bold">Inquilinos</span>
+                            <span className="font-bold text-sm">Inquilinos</span>
                         </button>
                     )}
 
@@ -88,19 +82,19 @@ export default function QuickActions({ onViewChange, role, currentProfile }: Qui
                         <div className="bg-purple-50 text-purple-600 p-3 rounded-full">
                             <UserPlus size={28} />
                         </div>
-                        <span className="font-bold">Familia</span>
+                        <span className="font-bold text-sm">Familia</span>
                     </button>
                 </>
             )}
 
             <button
-                onClick={() => alert('Simulación: Abriendo portal de pagos...')} // Mock action
+                onClick={() => alert('Simulación: Abriendo portal de pagos...')}
                 className="flex flex-col items-center justify-center gap-3 bg-white text-slate-700 p-6 rounded-2xl shadow-sm border border-gray-100 active:scale-95 transition-transform"
             >
                 <div className="bg-purple-50 text-purple-600 p-3 rounded-full">
                     <CreditCard size={28} />
                 </div>
-                <span className="font-bold">Expensas</span>
+                <span className="font-bold text-sm">Expensas</span>
             </button>
         </div>
     );

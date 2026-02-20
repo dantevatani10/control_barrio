@@ -233,6 +233,27 @@ class MockService {
             .sort((a: { unit?: string }, b: { unit?: string }) => (a.unit || "").localeCompare(b.unit || ""));
     }
 
+    getActiveInvitationsForToday() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(today);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        return this.invitations.filter(i =>
+            i.status === 'active' &&
+            new Date(i.valid_from) <= endOfDay &&
+            new Date(i.valid_to) >= today
+        ).map(i => ({
+            id: i.id,
+            type: 'invitation',
+            name: i.guest_name,
+            dni: i.guest_dni,
+            unit: i.unit_id,
+            plate: i.plate,
+            status: 'valid'
+        }));
+    }
+
     getVisitsForToday(query: string) {
         if (!query) return [];
         const q = query.toLowerCase();

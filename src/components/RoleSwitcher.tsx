@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { clsx } from 'clsx';
 import { Shield, User, Lock, RotateCw } from 'lucide-react';
 import { Role } from '@/types';
@@ -9,6 +9,7 @@ import { usePathname, useRouter } from 'next/navigation';
 export default function RoleSwitcher() {
     const router = useRouter();
     const pathname = usePathname();
+    const [showReset, setShowReset] = useState(false);
 
     const getRoleFromPath = (): Role => {
         if (pathname?.includes('/admin')) return 'admin';
@@ -27,12 +28,7 @@ export default function RoleSwitcher() {
         <div className="fixed bottom-6 right-6 z-50">
             {/* Reset Demo Button */}
             <button
-                onClick={() => {
-                    if (confirm('¿Reiniciar demo? Se borrarán todos los datos.')) {
-                        window.localStorage.clear();
-                        window.location.href = '/';
-                    }
-                }}
+                onClick={() => setShowReset(true)}
                 className="absolute -top-10 right-0 bg-slate-800 text-white hover:bg-slate-700 text-xs px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg transition-all hover:scale-105 active:scale-95"
                 title="Reiniciar Demo"
             >
@@ -90,6 +86,20 @@ export default function RoleSwitcher() {
                     {currentRole === 'admin' && <span className="text-sm font-bold pr-2">Admin</span>}
                 </button>
             </div>
+
+            {/* Reset Confirmation Dialog */}
+            {showReset && (
+                <div className="fixed inset-0 z-[99999] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95">
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">¿Reiniciar la Demo?</h3>
+                        <p className="text-slate-600 mb-6">Se borrarán todos los datos simulados y volverás a la pantalla de inicio.</p>
+                        <div className="flex gap-3">
+                            <button onClick={() => setShowReset(false)} className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200">Cancelar</button>
+                            <button onClick={() => { window.localStorage.clear(); window.location.href = '/'; }} className="flex-1 px-4 py-2 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700">Reiniciar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
